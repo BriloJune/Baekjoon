@@ -40,14 +40,6 @@ int main() {
     while (T--) {
         int K;
         cin >> K;
-        if (SumFunc(triangleNumbers, K)) {
-            cout << 1 << endl; // 삼각수 3개의 합으로 표현 가능
-        }
-        else {
-            cout << 0 << endl; // 표현 불가능
-        }
+        cout<<SumFunc(triangleNumbers, K)<<endl;
     }
-
-
-    return 0;
 }
