@@ -1,47 +1,49 @@
 #include <iostream>
 #include <vector>
 #include <queue>
-#include<algorithm>
+#include <algorithm>
 
 using namespace std;
 
-struct cmp {
-	bool operator()(const pair<int, int>& a, const pair<int, int>& b) {
-		return a.second > b.second;
-	}
-};
-
 int solution(vector<vector<int>> jobs) {
-	int answer = 0;
+    // 작업을 요청 시각 기준으로 정렬
+    sort(jobs.begin(), jobs.end());
 
-	sort(jobs.begin(), jobs.end());
-	priority_queue<pair<int, int>, vector<pair<int, int>>, cmp> pq;
-	int currTime = 0;
-	int i = 0;
-	int jobsSize = jobs.size();
-	while (1) {
-		if (i >= jobs.size() && pq.empty()) {
-			break;
-		}
-		while (i < jobsSize && jobs[i][0] <= currTime) {
-			pq.push({ jobs[i][0], jobs[i][1] });
-			i++;
-		}
-		if (!pq.empty()) {
-			answer += (currTime - pq.top().first + pq.top().second);
-			currTime += pq.top().second;
-			pq.pop();
-		}
-		else {
-			currTime = jobs[i][0];
-		}
-	}
-	answer /= jobsSize;
+    int time = 0;          // 현재 시각
+    int total_time = 0;    // 총 반환 시간
+    int i = 0;             // 작업 인덱스
+    int n = jobs.size();   // 작업 수
 
-	return answer;
+    // 최소 힙: 소요 시간(duration)을 기준으로 정렬
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> min_heap;
+
+    while (i < n || !min_heap.empty()) {
+        // 현재 시각까지 요청된 작업을 힙에 추가
+        while (i < n && jobs[i][0] <= time) {
+            min_heap.push({jobs[i][1], jobs[i][0]}); // {소요 시간, 요청 시각}
+            i++;
+        }
+
+        if (!min_heap.empty()) {
+            // 힙에서 소요 시간이 가장 짧은 작업을 꺼냄
+            auto [duration, start] = min_heap.top();
+            min_heap.pop();
+
+            // 작업 처리
+            time += duration;                  // 현재 시각 갱신
+            total_time += time - start;        // 반환 시간 계산
+        } else {
+            // 대기 중인 작업이 없으면 다음 작업의 요청 시각으로 이동
+            time = jobs[i][0];
+        }
+    }
+
+    // 반환 시간 평균의 정수 부분 반환
+    return total_time / n;
 }
 
-int main()
-{
-	
+int main() {
+    vector<vector<int>> jobs = {{0, 3}, {1, 9}, {3, 5}};
+    cout << solution(jobs) << endl; // 출력: 8
+    return 0;
 }
